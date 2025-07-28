@@ -1,0 +1,11 @@
+notebook
+PyGithub
+python-dotenv
+pandas
+GitPython
+matplotlib
+seaborn
+scipy
+graphviz
+PyYAML
+toml
