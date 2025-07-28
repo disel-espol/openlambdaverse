@@ -1,6 +1,8 @@
 # OpenLambdaVerse
 An Open-Source Dataset of AWS Lambda Functions Published on GitHub
 
+See the end of this README for citation instructions.
+
 ## Requirements
 - Python 3.11.3 (also tested with Python 3.13.3 in later revisions)
 - A GitHub account
@@ -311,3 +313,11 @@ Use `notebooks/flowcharts.ipynb` to generate the flowchart images.
 - `paper/figs/flowchart_eda`
 - `paper/figs/flowchart_eda.pdf`
 - `paper/figs/flowchart.pdf`
+
+---
+
+Please cite as follows:
+
+Ángel C. Chávez-Moreno and Cristina L. Abad. OpenLambdaVerse: A Dataset and Analysis of Open-Source Serverless Applications. IEEE International Conference on Cloud Engineering (IC2E), to appear. 2025.  
+Link to code repository: [https://github.com/disel-espol/openlambdaverse](https://github.com/disel-espol/openlambdaverse).  
+Link to dataset: [https://zenodo.org/records/16533581](https://zenodo.org/records/16533581)
