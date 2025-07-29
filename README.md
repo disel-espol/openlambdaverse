@@ -39,6 +39,8 @@ The `.env_demo` file provides the environment variables required by the notebook
   The directory where repositories will be cloned to.
 - `CONFIG_FILES_DIRECTORY`:
   The directory where configuration files will be stored for better analysis.
+- `REPOS_SOURCE_DIRECTORY`:
+  The directory where repos. can be sourced from using `scripts/copy_repos_from_broader_clone.py`.
 
 ## Methodology for Data Extraction
 Based on Wonderless. The original implementation can be found [here](https://github.com/prg-grp/wonderless).
@@ -313,6 +315,22 @@ Use `notebooks/flowcharts.ipynb` to generate the flowchart images.
 - `paper/figs/flowchart_eda`
 - `paper/figs/flowchart_eda.pdf`
 - `paper/figs/flowchart.pdf`
+
+# Additional analysis
+Using pygount, we can gather additional code complexity measurements.
+
+Make sure to export your environment variables:
+```bash
+export $(cat .env | xargs)
+```
+
+Then, run:
+```bash
+pygount --format=summary $CLONED_REPOS_DIRECTORY --format=cloc-xml --out=pygount/pygount_output.xml --verbose
+```
+
+## Yearly histogram
+- `notebooks/eda_github_repo_creation_dates.ipynb`
 
 ---
 

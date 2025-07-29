@@ -9,3 +9,4 @@ scipy
 graphviz
 PyYAML
 toml
+pygount

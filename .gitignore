@@ -170,5 +170,6 @@ csvs/
 data/
 docs/papers/
 paper/
+pygount/
 scripts/logs/
 temp_data/
