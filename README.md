@@ -336,6 +336,8 @@ pygount --format=summary $CLONED_REPOS_DIRECTORY --format=cloc-xml --out=pygount
 
 Please cite as follows:
 
-Ángel C. Chávez-Moreno and Cristina L. Abad. OpenLambdaVerse: A Dataset and Analysis of Open-Source Serverless Applications. IEEE International Conference on Cloud Engineering (IC2E), to appear. 2025.  
+Ángel C. Chávez-Moreno and Cristina L. Abad. OpenLambdaVerse: A Dataset and Analysis of Open-Source Serverless Applications. _IEEE International Conference on Cloud Engineering (IC2E), to appear_. 2025.  
+
 Link to code repository: [https://github.com/disel-espol/openlambdaverse](https://github.com/disel-espol/openlambdaverse).  
-Link to dataset: [https://zenodo.org/records/16533581](https://zenodo.org/records/16533581)
+Link to dataset: [https://zenodo.org/records/16533581](https://zenodo.org/records/16533581).  
+Link to pre-print: [https://arxiv.org/abs/2508.01492](https://arxiv.org/abs/2508.01492).  
