@@ -3,7 +3,6 @@ import glob
 import logging
 import sys
 
-# --- Configuration ---
 # Find the most recent code search directory in data/processed
 PROCESSED_DATA_DIR = os.path.join(os.getcwd(), "data", "processed")
 latest_dir_pattern = os.path.join(PROCESSED_DATA_DIR, "code_search_*")
@@ -23,7 +22,7 @@ INPUT_FILENAME = os.path.join(UNIQUE_REPO_URLS_DIR, "unique_repo_urls.txt")
 OUTPUT_FILENAME = os.path.join(FILTERED_REPO_URLS_DIR, "filtered_repo_urls.txt")
 LOG_FILENAME = os.path.join(LOGS_DIR, "filter_serverless_repos_log.log")
 
-# --- Logging Setup ---
+# Logging setup
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
 
@@ -36,7 +35,7 @@ logging.basicConfig(
     ]
 )
 
-# --- Main Filtering Logic ---
+# Filter serverless-framework related repos
 lines_read = 0
 lines_written = 0
 errors = 0
@@ -44,7 +43,7 @@ errors = 0
 # Users to filter out
 FILTER_USERS = {"serverless", "serverless-components"}
 
-# --- Log Initial Information ---
+# Log initial information
 logging.info(f"Script started: {' '.join(sys.argv)}")
 logging.info(f"Attempting to read unique repo URLs from: {INPUT_FILENAME}")
 logging.info(f"Attempting to write filtered repo URLs to: {OUTPUT_FILENAME}")
@@ -106,7 +105,6 @@ except Exception as e:
     exit(1)
 finally:
     # Final summary logging
-    logging.info("--- Filtering Summary ---")
     logging.info(f"Total lines read from input: {lines_read}")
     logging.info(f"Total lines written to output: {lines_written}")
     logging.info(f"Total errors encountered: {errors}")
