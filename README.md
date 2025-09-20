@@ -95,7 +95,7 @@ python src/filter_urls.py
 
 #### Notes
 - The script automatically identifies the latest `code_search_YYYYMMDD_hhmmss` directory and processes the corresponding results.
-- Only valid URLs are retained, and lines from the initial fetch such as `# Results for:` are excluded.
+- It also does some cleaning of the previous output, keeping only valid URLs in the end (lines such as `# Results for:` are excluded).
 - Ensure that the `data/raw` directory contains the results from the code search before running this script.
 
 ---
