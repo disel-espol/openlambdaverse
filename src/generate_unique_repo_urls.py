@@ -4,7 +4,6 @@ import logging
 import sys
 from urllib.parse import urlparse  # Use urlparse for more robust URL handling
 
-# --- Configuration ---
 # Find the most recent code search directory in data/processed
 PROCESSED_DATA_DIR = os.path.join(os.getcwd(), "data", "processed")
 latest_dir_pattern = os.path.join(PROCESSED_DATA_DIR, "code_search_*")
@@ -24,7 +23,7 @@ INPUT_FILENAME = os.path.join(FILTERED_URLS_DIR, "filtered_urls.txt")
 OUTPUT_FILENAME = os.path.join(UNIQUE_REPO_URLS_DIR, "unique_repo_urls.txt")
 LOG_FILENAME = os.path.join(LOGS_DIR, "base_url_extractor_log.log")
 
-# --- Logging Setup ---
+# Logging setup
 # Remove existing handlers if any script runs this multiple times in one session
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
@@ -38,13 +37,13 @@ logging.basicConfig(
     ]
 )
 
-# --- Main Extraction Logic ---
+# Generate unique base repository URLs from filtered URLs
 lines_read = 0
 urls_extracted = 0
 errors = 0
 unique_repo_urls = set()  # Use a set to automatically store unique URLs
 
-# --- Log Initial Information ---
+# Log initial information
 logging.info(f"Script started: {' '.join(sys.argv)}")
 logging.info(f"Attempting to read filtered URLs from: {INPUT_FILENAME}")
 logging.info(f"Attempting to write unique base repo URLs to: {OUTPUT_FILENAME}")
@@ -138,7 +137,6 @@ except Exception as e:
     exit(1)
 finally:
     # Final summary logging
-    logging.info("--- Extraction Summary ---")
     logging.info(f"Total lines read from input: {lines_read}")
     logging.info(f"Unique base repository URLs extracted: {len(unique_repo_urls)}")
     logging.info(f"Lines skipped due to errors or non-GitHub URLs: {errors}")
