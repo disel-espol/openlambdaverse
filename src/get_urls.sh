@@ -70,9 +70,8 @@ token_test()
   fi
   http_status=$(curl --silent --output /dev/null --write-out "%{http_code}" -H "Authorization: token $token" "$url/user")
   if [ "$http_status" -ne 200 ]; then
-      echo "Error: GitHub token seems invalid or lacks permissions (HTTP status: $http_status)."
-      echo "Warning: Proceeding potentially with reduced rate limits."
-      token_cmd=""
+      echo "Error: GitHub token seems invalid or lacks permissions (HTTP status: $http_status). Please check it and try again."
+      exit 1
   else
       echo "GitHub token validated."
       token_cmd="Authorization: token $token"
