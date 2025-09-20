@@ -1,10 +1,8 @@
 import os
 import glob
-import datetime
 import logging
 import sys
 
-# --- Configuration ---
 # Find the most recent code search directory
 RAW_DATA_DIR = os.path.join(os.getcwd(), "data", "raw")
 latest_dir_pattern = os.path.join(RAW_DATA_DIR, "code_search_*")
@@ -36,7 +34,7 @@ os.makedirs(LOG_DIR, exist_ok=True)
 OUTPUT_FILENAME = os.path.join(OUTPUT_DIR, "filtered_urls.txt")
 LOG_FILENAME = os.path.join(LOG_DIR, "url_filter_log.log")
 
-# --- Logging Setup ---
+# Logging Setup
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
 
@@ -49,7 +47,7 @@ logging.basicConfig(
     ]
 )
 
-# --- Log Initial Information ---
+# Log initial information
 logging.info(f"Script started: {' '.join(sys.argv)}")
 logging.info(f"Latest input file: {INPUT_FILENAME}")
 logging.info(f"Filtered URLs will be saved to: {OUTPUT_FILENAME}")
@@ -64,7 +62,7 @@ FILTERS = {
 # Ensure all filters are lowercase for case-insensitive comparison
 FILTERS_LOWER = {f.lower() for f in FILTERS}
 
-# --- Main Filtering Logic ---
+# Filtering process
 lines_read = 0
 lines_written = 0
 lines_filtered = 0
