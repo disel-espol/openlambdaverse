@@ -1,98 +1,54 @@
 #!/usr/bin/env bash
-#
 
-url="https://api.github.com"
+url="https://api.github.com" # GitHub REST API base URL
 
-# Source the.env file if it exists, otherwise expect GITHUB_AUTH_TOKEN to be set
+# Source the .env file and set the GitHub token
 if [ -f ".env" ]; then
   source .env
 fi
-# Set token to your GitHub access token (public access)
-token=${GITHUB_AUTH_TOKEN:-$token} # Use GITHUB_AUTH_TOKEN if set, else use token from.env
-today=$(date +"%Y-%m-%d")
 
-# --- Define Categories of Configuration Filenames to Search For ---
+if [ -z "$GITHUB_AUTH_TOKEN" ]; then
+  echo "Error: GITHUB_AUTH_TOKEN is not set in your .env file."
+  exit 1
+fi
 
-# Strategy 1 & 5: Serverless/Platform Configs
-serverless_configs=(
-    "serverless.yml"    # Serverless Framework
-    "template.yaml"     # AWS SAM
-    "template.yml"      # AWS SAM (alternative extension)
-    "samconfig.toml"    # AWS SAM CLI config
-    "function.json"     # Azure Functions
-    "host.json"         # Azure Functions
-    "stack.yml"         # OpenFaaS (Note: May yield some false positives)
-    "service.yaml"      # Knative (Note: May yield many false positives)
+token="$GITHUB_AUTH_TOKEN"
+
+today=$(date +"%Y-%m-%d") # Current date for filenames
+
+# Filename-based code search
+config_files=(
+    "serverless.yml" # Serverless Framework
     # Add other platform/framework specific files if needed
 )
 
-# Strategy 2: Security Artifact Filenames
-security_configs=(
-    ".checkov.yml"      # Checkov IaC Scanner
-    "tfsec-config.yml"  # TFSec IaC Scanner config (less common filename, check variations)
-    ".tfsec.yml"        # TFSec common config name
-    ".snyk"             # Snyk config file
-    # Add other security tool config filenames (e.g., Semgrep, Terrascan if common names exist)
-)
+# We define the base directory for the code search
+parent_dir="data/raw/code_search_$(date +"%Y%m%d_%H%M%S")" # The timestamp guarantees uniqueness per run
 
-# Strategy 3: Privacy Indicator Filenames
-privacy_configs=(
-    "PRIVACY.md"        # Common privacy policy filename (Note: Weak indicator alone)
-)
-
-# Strategy 4: AI/ML MLOps Tool Filenames
-mlops_configs=(
-    "MLproject"         # MLflow project file
-    "dvc.yaml"          # DVC config file
-    # Add other MLOps tool config filenames if common conventions exist
-)
-
-# Strategy 2/Implied: Common CI/CD Platform Config Filenames (Root level)
-cicd_configs=(
-    ".gitlab-ci.yml"    # GitLab CI/CD
-    "azure-pipelines.yml" # Azure Pipelines
-    "bitbucket-pipelines.yml" # Bitbucket Pipelines
-    "Jenkinsfile"       # Jenkins Pipeline
-    ".travis.yml"       # Travis CI
-    "circle.yml"        # CircleCI (older format)
-    # Note: GitHub Actions are usually in.github/workflows/, harder to target directly via filename search alone at root.
-    # Could add common workflow names like 'main.yml', 'build.yml' but might be too noisy without path context.
-)
-
-# Combine all filename arrays into one for iteration
-all_config_files=(
-    "${serverless_configs[@]}"
-    "${security_configs[@]}"
-    "${privacy_configs[@]}"
-    "${mlops_configs[@]}"
-    "${cicd_configs[@]}"
-)
-
-
-# --- Define Parent Directory for the code search results ---
-parent_dir="data/raw/code_search_$(date +"%Y%m%d_%H%M%S")" # Unique parent dir per run
-
-# --- Define Subdirectories ---
-results_dir="$parent_dir/results_by_filename" # More specific name
+# We define subdirectories for the code search results, errors, and logs
+results_dir="$parent_dir/results_by_filename"
 errors_dir="$parent_dir/errors"
-logs_dir="$parent_dir/logs" # Separate logs directory
+logs_dir="$parent_dir/logs"
 
-# --- Define Log File ---
+# Log file path
 log_file="$logs_dir/code_search_${today}.log"
 
-# --- Dynamic Interval Parameters ---
-lower_bound=0 # 0 bytes (adjust as needed, smaller files are more likely config files)
-upper_bound=384000 # 384kB (adjust as needed, larger files may not be config files)
-min_interval=20       # Starting and smallest interval
-max_interval=100000     # Largest allowed interval (adjust as needed)
-current_interval=$min_interval # Start with the minimum
+# To comply with GitHub API rate limits, we will implement dynamic interval adjustment, starting with a moderate interval and then adjusting based on results
+
+# File size bounds (in bytes)
+lower_bound=0 # 0 bytes (adjust as needed)
+upper_bound=384000 # 384KB (current limit for searchable files, adjust as needed)
+
+# Interval settings
+min_interval=20 # Start with a small interval for file sizes (adjust as needed)
+max_interval=100000 # Largest allowed file size interval (adjust as needed)
+current_interval=$min_interval # Start with the previously defined minimum
+
 # Thresholds for adjusting interval (adjust as needed)
 low_results_threshold=900
 high_results_threshold=900 # Consider decreasing if > this OR API limit hit
 
-
-# --- Helper Functions ---
-
+# Function to check for required dependencies
 dependency_test()
 {
   echo "Checking dependencies..."
@@ -105,7 +61,7 @@ dependency_test()
   echo "All dependencies found."
 }
 
-
+# Function to validate GitHub token
 token_test()
 {
   if [ -z "$token" ]; then
@@ -128,6 +84,7 @@ working() {
    echo -n "."
 }
 
+# Completion indicator
 work_done() {
   echo -n "done!"
   echo -e "\n"
@@ -155,7 +112,7 @@ output_list() {
 # Function to fetch repos for a specific filename
 get_repos_for_file() {
   local current_filename=$1
-  echo "--- Starting search for filename: $current_filename ---"
+  echo "Starting search for filename: $current_filename"
 
   # Define and Clear Specific Output File
   local base_filename="${current_filename}_results_${today}.txt"
@@ -225,7 +182,7 @@ get_repos_for_file() {
     local repos_batch=() # Local array for the batch
 
     if [[ -z "$last_repo_page" ]] && [[ $requires_retry_immediately -ne 1 ]]; then
-      # Single page
+      # Single page results or no pagination
       echo "Fetching single page or no results for $current_filename size $size_range"
       sleep 8
       local response=$(curl --silent -H "$token_cmd" "$api_endpoint")
@@ -254,7 +211,7 @@ get_repos_for_file() {
       hit_api_limit=0
 
     elif [[ $max_page -gt 0 ]]; then
-      # Multiple pages
+      # Multiple pages (up to 10)
       if [[ "$max_page" -eq 10 ]]; then hit_api_limit=1; fi
       echo "Fetching $max_page pages for $current_filename size $size_range"
       for (( k=1; k<=$max_page; k++ )); do
@@ -288,7 +245,7 @@ get_repos_for_file() {
         echo "Appended $batch_count repository URLs for $current_filename (size: $size_range) to $specific_output_file"
     fi
 
-    # Dynamic Interval Adjustment Logic
+    # Adjusting interval based on results
     local next_interval=$current_interval
     if [[ $batch_count -lt $low_results_threshold ]] && [[ $hit_api_limit -ne 1 ]]; then
         next_interval=$((current_interval * 2))
@@ -305,14 +262,14 @@ get_repos_for_file() {
          fi
     fi
 
-    # Calculate Next Loop Start Point & Set Interval
+    # Calculate the next starting point
     local interval_used_this_iteration=$current_interval
     i=$((i + interval_used_this_iteration))
     current_interval=$next_interval
 
   done # End while loop
 
-  echo "--- Finished search for filename: $current_filename ---"
+  echo "Finished search for filename: $current_filename"
   echo ""
 } # End function get_repos_for_file
 
@@ -327,20 +284,20 @@ token_test
 echo "Ensuring directories exist: $results_dir, $errors_dir, and $logs_dir"
 mkdir -p "$results_dir" "$errors_dir" "$logs_dir"
 
-# Setup Log File Redirection
+# Setup log file - redirect all output from here on to the log file
 exec > "$log_file" 2>&1
-echo "--- Log started at $(date) ---"
+echo "Log started at $(date)"
 echo "Full log is being written to: $log_file"
 echo "Results will be saved per-file in '$results_dir/'"
 echo "Errors will be saved in '$errors_dir/'"
 
 # Loop through each config file and fetch repos
 # All output from this loop goes to the log file
-for filename in "${all_config_files[@]}"; do
+for filename in "${config_files[@]}"; do
     get_repos_for_file "$filename"
 done
 
-# --- Post-processing: Combine, Deduplicate, and Filter URLs ---
+# Post-processing step: we combine, deduplicate, and filter results
 # This part runs after the main loop, output goes to log file
 combined_output_file="$parent_dir/combined_unique_results_${today}.txt"
 echo "Combining results from '$results_dir/' into '$combined_output_file'..."
@@ -359,10 +316,9 @@ if [[ $? -eq 0 ]]; then
 else
     echo "Error during combining/deduplicating results. Check individual files in '$results_dir/'."
 fi
-# --- End Post-processing ---
+# End of post-processing
 
-
-echo "--- Log finished at $(date) ---"
+echo "Log finished at $(date)"
 echo "All searches complete."
 
 exit 0
