@@ -9,12 +9,9 @@ from dotenv import load_dotenv  # Import dotenv to load environment variables
 
 import yaml
 
-# --- YAML Configuration ---
-# A generic constructor to handle all CloudFormation tags
+# A generic constructor to handle all AWS CloudFormation tags
 def generic_constructor(loader, tag_suffix, node):
-    # Depending on the node type (scalar, sequence, mapping),
-    # you can construct the data accordingly.
-    # For simplicity, this example just returns the node's value.
+    # This will handle scalar, sequence, and mapping nodes
     if isinstance(node, yaml.ScalarNode):
         return loader.construct_scalar(node)
     elif isinstance(node, yaml.SequenceNode):
@@ -23,7 +20,7 @@ def generic_constructor(loader, tag_suffix, node):
         return loader.construct_mapping(node)
     return None
 
-# Register the constructor for all CloudFormation tags
+# Register the constructor for all AWS CloudFormation tags
 yaml.SafeLoader.add_constructor('!Ref', generic_constructor)
 yaml.SafeLoader.add_constructor('!GetAtt', generic_constructor)
 yaml.SafeLoader.add_constructor('!Sub', generic_constructor)
@@ -37,7 +34,7 @@ yaml.SafeLoader.add_constructor('!Cidr', generic_constructor)
 yaml.SafeLoader.add_constructor('!FindInMap', generic_constructor)
 yaml.SafeLoader.add_constructor('!Transform', generic_constructor)
 
-# Conditional Functions
+# Conditional functions
 yaml.SafeLoader.add_constructor('!And', generic_constructor)
 yaml.SafeLoader.add_constructor('!Or', generic_constructor)
 yaml.SafeLoader.add_constructor('!Not', generic_constructor)
@@ -45,10 +42,10 @@ yaml.SafeLoader.add_constructor('!Equals', generic_constructor)
 yaml.SafeLoader.add_constructor('!If', generic_constructor)
 yaml.SafeLoader.add_constructor('!Condition', generic_constructor)
 
-# --- Load Environment Variables ---
+# Load environment variables from a .env file if present
 load_dotenv()
 
-# --- Configuration ---
+# Find the most recent code search directory in data/processed
 PROCESSED_DATA_DIR = os.path.join(os.getcwd(), "data", "processed")
 latest_dir_pattern = os.path.join(PROCESSED_DATA_DIR, "code_search_*")
 latest_dir = max(glob.glob(latest_dir_pattern), key=os.path.getmtime, default=None)
@@ -70,7 +67,7 @@ GITHUB_TOKEN = os.getenv("GITHUB_AUTH_TOKEN")
 if not GITHUB_TOKEN:
     raise EnvironmentError("GITHUB_AUTH_TOKEN environment variable is not set.")
 
-# --- Logging Setup ---
+# Logging setup
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
 logging.basicConfig(
@@ -82,7 +79,7 @@ logging.basicConfig(
     ]
 )
 
-# --- GitHub API Setup ---
+# GitHub REST API setup
 HEADERS = {
     "Authorization": f"Bearer {GITHUB_TOKEN}",
     "Accept": "application/vnd.github.v3+json"
@@ -426,7 +423,7 @@ def get_last_commit_date(owner_str, repo_str):
         logging.error(f"Failed to decode JSON for last commit of {owner_str}/{repo_str}: {e}")
     return None
 
-# --- Main Execution ---
+# Main processing loop
 def main():
     logging.info(f"Starting metadata extraction from: {INPUT_FILENAME}")
     if not os.path.isfile(INPUT_FILENAME):
