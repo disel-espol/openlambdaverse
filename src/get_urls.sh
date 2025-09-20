@@ -78,15 +78,13 @@ token_test()
   fi
 }
 
-# Progress indicator
+# Progress indicators
 working() {
-   echo -n "."
+  printf "Fetching page..."
 }
 
-# Completion indicator
 work_done() {
-  echo -n "done!"
-  echo -e "\n"
+  printf " done!\n"
 }
 
 # Function to append results to the output file
