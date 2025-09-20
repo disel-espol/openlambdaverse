@@ -1,22 +1,25 @@
-# OpenLambdaVerse
-An Open-Source Dataset of AWS Lambda Functions Published on GitHub
+# OpenLambdaVerse: A Dataset and Analysis of Open-Source Serverless Applications
+
+This repository contains the code and instructions for building the dataset and performing its characterization.
 
 See the end of this README for citation instructions.
 
-## Requirements
-- Python 3.11.3 (also tested with Python 3.13.3 in later revisions)
-- A GitHub account
+> **Note:** All development and testing was done on macOS. Depending on the specific operating system, some of these instructions/commands may need to be adjusted.
 
-## Installation
+## Requirements
+- Python 3.11.3 (also tested with Python 3.13.3)
+- A GitHub account
+- `jq` command-line tool  
+    ```bash
+    brew install jq
+    ```
+  - [Learn more about jq](https://stedolan.github.io/jq/)
+
+## Setup
 1. Create and activate a virtual environment:
    ```bash
    python -m venv env
-   source env/bin/activate  # On MacOS/Linux
-   ```
-   or
-   
-   ```bash
-   . env\Scripts\activate.ps1     # On Windows
+   source env/bin/activate
    ```
 2. Install the required dependencies:
    ```bash
@@ -28,7 +31,7 @@ See the end of this README for citation instructions.
    ```
 
 ## About the `.env` File
-The `.env_demo` file provides the environment variables required by the notebooks. These variables typically include sensitive information, such as API tokens, that should be kept secure.
+The `.env_demo` file provides the environment variables required by the scripts, and their placeholder values should be changed to those that fit your implementation in an unversioned `.env` file.
 
 ### Environment Variables
 - `GITHUB_AUTH_TOKEN`:  
@@ -38,31 +41,17 @@ The `.env_demo` file provides the environment variables required by the notebook
 - `CLONED_REPOS_DIRECTORY`:
   The directory where repositories will be cloned to.
 - `CONFIG_FILES_DIRECTORY`:
-  The directory where configuration files will be stored for better analysis.
+  The directory where configuration files will be stored for quicker analysis on certain steps.
 - `REPOS_SOURCE_DIRECTORY`:
-  The directory where repos. can be sourced from using `scripts/copy_repos_from_broader_clone.py`.
+  The directory where repositories can be sourced from using `scripts/copy_repos_from_broader_clone.py`.
 
 ## Methodology for Data Extraction
 Based on Wonderless. The original implementation can be found [here](https://github.com/prg-grp/wonderless).
-This implementation is also based from OS<sub>3</sub>. The implementation can be found [here](https://github.com/edgeumd/serverless_dataset).
-
-### On macOS
-1. **Install `jq`:**
-   ```bash
-   brew install jq
-   ```
-   Learn more about `jq` [here](https://stedolan.github.io/jq/).
-
----
-
-## Pipeline Steps
+This implementation is also based on improvements introduced in OS<sub>3</sub>. Its implementation can be found [here](https://github.com/edgeumd/serverless_dataset).
 
 ### Code search
-The `get_urls.sh` script conducts a code search on GitHub using its API, targeting specific serverless configuration files, such as:  
-- `serverless.yml`: Serverless Framework  
-- `template.yaml`: AWS SAM  
-- `template.yml`: AWS SAM (alternative extension)  
-- `samconfig.toml`: AWS SAM CLI configuration  
+The `get_urls.sh` script performs a targeted code search on GitHub via its API, identifying repositories that contain specific serverless configuration files, such as:
+- `serverless.yml`: (used by the Serverless Framework)
 
 Additional configuration files can also be specified within the script.
 
