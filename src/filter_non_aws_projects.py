@@ -4,7 +4,6 @@ import glob
 import logging
 import sys
 
-# --- Configuration ---
 PROCESSED_DATA_DIR = os.path.join(os.getcwd(), "data", "processed")
 latest_dir_pattern = os.path.join(PROCESSED_DATA_DIR, "code_search_*")
 latest_dir = max(glob.glob(latest_dir_pattern), key=os.path.getmtime, default=None)
@@ -22,7 +21,7 @@ OUTPUT_FILENAME = os.path.join(RESULTS_DIR, "aws_provider_repos.jsonl")
 LOG_FILENAME = os.path.join(LOGS_DIR, "filter_by_provider_log.log")
 TARGET_PROVIDER = "aws"
 
-# --- Logging Setup ---
+# Logging setup
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
 logging.basicConfig(
@@ -92,7 +91,6 @@ except Exception as e:
     logging.exception(f"Critical error: {e}")
     sys.exit(1)
 finally:
-    logging.info("--- Filtering Summary ---")
     logging.info(f"Total lines read: {lines_read}")
     logging.info(f"Lines written (AWS provider): {lines_written}")
     logging.info(f"Lines filtered out (other/missing provider): {lines_filtered_provider}")
