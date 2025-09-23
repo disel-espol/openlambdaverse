@@ -4,7 +4,6 @@ import json
 import logging
 import sys
 
-# --- Configuration ---
 PROCESSED_DATA_DIR = os.path.join(os.getcwd(), "data", "processed")
 latest_dir_pattern = os.path.join(PROCESSED_DATA_DIR, "code_search_*")
 latest_dir = max(glob.glob(latest_dir_pattern), key=os.path.getmtime, default=None)
@@ -21,7 +20,7 @@ INPUT_FILENAME = os.path.join(RESULTS_DIR, "repository_metadata.jsonl")
 OUTPUT_FILENAME = os.path.join(RESULTS_DIR, "licensed_repos.jsonl")
 LOG_FILENAME = os.path.join(LOGS_DIR, "filter_unlicensed_repos_log.log")
 
-# --- Logging Setup ---
+# Logging setup
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
 logging.basicConfig(
@@ -40,6 +39,7 @@ def is_repo_licensed(repo_data):
         return True
     return False
 
+# Function to filter licensed repositories
 def filter_licensed_repos(input_path, output_path):
     lines_read = 0
     lines_written = 0
@@ -69,7 +69,6 @@ def filter_licensed_repos(input_path, output_path):
             if lines_read % 1000 == 0:
                 logging.info(f"Processed {lines_read} lines... Kept: {lines_written}, Filtered: {lines_filtered}, Errors: {errors}")
 
-    logging.info("--- Filtering Summary ---")
     logging.info(f"Total lines read: {lines_read}")
     logging.info(f"Lines written (licensed repos): {lines_written}")
     logging.info(f"Lines filtered out (no license): {lines_filtered}")
