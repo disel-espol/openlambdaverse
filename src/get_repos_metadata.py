@@ -10,8 +10,7 @@ from dotenv import load_dotenv  # Import dotenv to load environment variables
 import yaml
 
 # A generic constructor to handle all AWS CloudFormation tags
-def generic_constructor(loader, tag_suffix, node):
-    # This will handle scalar, sequence, and mapping nodes
+def generic_constructor(loader, node):
     if isinstance(node, yaml.ScalarNode):
         return loader.construct_scalar(node)
     elif isinstance(node, yaml.SequenceNode):
@@ -21,26 +20,11 @@ def generic_constructor(loader, tag_suffix, node):
     return None
 
 # Register the constructor for all AWS CloudFormation tags
-yaml.SafeLoader.add_constructor('!Ref', generic_constructor)
-yaml.SafeLoader.add_constructor('!GetAtt', generic_constructor)
-yaml.SafeLoader.add_constructor('!Sub', generic_constructor)
-yaml.SafeLoader.add_constructor('!Join', generic_constructor)
-yaml.SafeLoader.add_constructor('!ImportValue', generic_constructor)
-yaml.SafeLoader.add_constructor('!Select', generic_constructor)
-yaml.SafeLoader.add_constructor('!Split', generic_constructor)
-yaml.SafeLoader.add_constructor('!GetAZs', generic_constructor)
-yaml.SafeLoader.add_constructor('!Base64', generic_constructor)
-yaml.SafeLoader.add_constructor('!Cidr', generic_constructor)
-yaml.SafeLoader.add_constructor('!FindInMap', generic_constructor)
-yaml.SafeLoader.add_constructor('!Transform', generic_constructor)
-
-# Conditional functions
-yaml.SafeLoader.add_constructor('!And', generic_constructor)
-yaml.SafeLoader.add_constructor('!Or', generic_constructor)
-yaml.SafeLoader.add_constructor('!Not', generic_constructor)
-yaml.SafeLoader.add_constructor('!Equals', generic_constructor)
-yaml.SafeLoader.add_constructor('!If', generic_constructor)
-yaml.SafeLoader.add_constructor('!Condition', generic_constructor)
+for tag in [
+    '!Ref', '!GetAtt', '!Sub', '!Join', '!ImportValue', '!Select', '!Split', '!GetAZs', '!Base64', '!Cidr',
+    '!FindInMap', '!Transform', '!And', '!Or', '!Not', '!Equals', '!If', '!Condition'
+]:
+    yaml.SafeLoader.add_constructor(tag, generic_constructor)
 
 # Load environment variables from a .env file if present
 load_dotenv()
