@@ -174,13 +174,14 @@ python src/filter_toy_projects.py
 ```
 
 #### Inputs and Outputs
+The input and output files are all located in the `data/processed/code_search_YYYYMMDD_hhmmss/results/` directory.
 
 | Script                       | Input File                                               | Output File                |
 |------------------------------|---------------------------------------------------------|----------------------------|
-| filter_forked_projects.py    | results/licensed_repos.jsonl                            | results/filtered_no_forks.jsonl    |
-| filter_shallow_projects.py   | results/filtered_no_forks.jsonl                                 | results/filtered_no_shallow.jsonl  |
-| filter_inactive_projects.py  | results/filtered_no_shallow.jsonl                               | results/filtered_no_inactive.jsonl |
-| filter_toy_projects.py       | results/filtered_no_inactive.jsonl                              | results/filtered_no_toy.jsonl      |
+| filter_forked_projects.py    | licensed_repos.jsonl                            | filtered_no_forks.jsonl    |
+| filter_shallow_projects.py   | filtered_no_forks.jsonl                                 | filtered_no_shallow.jsonl  |
+| filter_inactive_projects.py  | filtered_no_shallow.jsonl                               | filtered_no_inactive.jsonl |
+| filter_toy_projects.py       | filtered_no_inactive.jsonl                              | filtered_no_toy.jsonl      |
 
 - **Logs:**  
   Each script produces a log file in `data/processed/code_search_YYYYMMDD_hhmmss/logs/`, named according to the script (e.g., `filter_forked_projects_log.log`).
