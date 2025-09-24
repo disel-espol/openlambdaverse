@@ -14,6 +14,10 @@ See the end of this README for citation instructions.
     brew install jq
     ```
   - [Learn more about jq](https://stedolan.github.io/jq/)
+- `cloc`
+    ```bash
+    brew install jq
+    ```
 
 ## Setup
 1. Create and activate a virtual environment:
@@ -227,8 +231,19 @@ python src/clone_projects.py
 - **Logs**:  
   `data/processed/code_search_YYYYMMDD_hhmmss/logs/clone_aws_repos.log`
 
-## CLOC
-For code complexity analysis, install CLOC:
+## Dataset characterization
+We provide the notebooks used for the dataset analysis and characterization.
+
+### Year of creation
+- `notebooks/analysis_github_repo_creation_dates.ipynb`
+
+### Event triggers
+- `notebooks/analysis_event_triggers.ipynb`
+
+### Code complexity
+
+#### CLOC
+If you haven't already, install CLOC:
 
 ```bash
 brew install cloc
@@ -239,15 +254,41 @@ Make sure to export your environment variables:
 export $(cat .env | xargs)
 ```
 
-Finally, run:
+Then run the following command:
 ```bash
-for d in "$CLONED_REPOS_DIRECTORY"/*/ ; do (cd "$d" && echo "$d" && cloc --vcs git); done >> cloc/cloc_output.txt
+for d in "$CLONED_REPOS_DIRECTORY"/*/; do (cd "$d" && cloc --vcs=git --exclude-dir=node_modules,.venv,venv,env,vendor,target,dist,build,out,__pycache__,.vscode,.idea --not-match-f='(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|poetry\.lock|Pipfile\.lock)' --json .) | jq -c --arg repo "$(basename "$d")" '. + {repository: $repo}' >> cloc/cloc_output.jsonl; done
+```
+jq -c --slurp '.[]' cloc/cloc_reports.jsonl > cloc/cloc_reports_fixed.jsonl  
+It iterates through the specified directory of projects, runs a detailed analysis on each one, and aggregates the results into a single `cloc_output.jsonl` file.
+
+Criteria for this analysis includes:
+- Only files tracked by Git are counted (--vcs=git).
+- Excludes common dependency directories (e.g., node_modules, .venv, vendor).
+- Excludes common build artifact directories (e.g., dist, build, target).
+- Filters out auto-generated package manager lock files (e.g., package-lock.json, poetry.lock).
+
+With this additional filtering, the CLOC analysis' output better reflects the code complexity of the serverless functions and/or the additional code supporting their implementation.
+
+### Treating non-git repos
+If any repos. have a missing .git directory, run this command on a separate directory with those repos.:
+```bash
+for d in "$REPO_DIR"; do (cd "$d" && cloc --exclude-dir=node_modules,.venv,venv,env,vendor,target,dist,build,out,__pycache__,.vscode,.idea --not-match-f='(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|poetry\.lock|Pipfile\.lock)' --json .) | jq -c --arg repo "$(basename "$d")" '. + {repository: $repo}' >> cloc/cloc_output_non_git.jsonl; done
 ```
 
-Output is saved on `cloc/cloc_output.txt`
+The output is saved in `cloc/cloc_output_non_git.jsonl`. Make sure to add your desired records into the broader `cloc/cloc_output.jsonl` output file.
+
+### Running analysis on select projects
+We also provide a script for specific projects. (it also handles repos. with missing .git):
+```bash
+sh scripts/analyze_selected_repos.sh
+```
+
+The output is saved in `cloc/cloc_output_selected_repos.jsonl`. Make sure to add your desired records into the broader `cloc/cloc_output.jsonl` output file.
+
+### Converting the output JSONL to CSV
 You can then convert this output to CSV using:
 ```bash
-python scripts/convert_loc_txt_csv.py
+python scripts/convert_cloc_jsonl_csv.py
 ```
 
 Then you can run the following notebooks to general additional CSV files for later:
@@ -278,23 +319,19 @@ python scripts/generate_runtimes_table.py
 We run the following scripts to create additional CSV files to be used on the notebooks.
 
 ```bash
-python scripts/generate_functions_counts.py
 python scripts/generate_providers_runtimes.py
 python scripts/generate_repo_metadata_counts.py
 python scripts/generate_repo_sizes_detail.py
 python scripts/generate_repo_topics_counts.py 
 ```
 #### Outputs
-- `csvs/events.csv`
 - `csvs/runtimes.csv`
 - `csvs/repo_metadata.csv`
 - `csvs/repo_sizes_detail.csv`
 - `csvs/repo_topics.csv`
 
 After running these, we proceed to use additional notebooks to generate the images (executed in order):
-- `notebooks/eda_functions_events_counts.ipynb`
 - `notebooks/eda_functions_events_counts_loc_repos.ipynb` 
-- `notebooks/eda_functions_events.ipynb` 
 - `notebooks/eda_functions_runtimes.ipynb` 
 - `notebooks/eda_github_repo_counts.ipynb` 
 - `notebooks/eda_github_repo_sizes.ipynb` 
@@ -308,23 +345,6 @@ Use `notebooks/flowcharts.ipynb` to generate the flowchart images.
 - `paper/figs/flowchart_eda`
 - `paper/figs/flowchart_eda.pdf`
 - `paper/figs/flowchart.pdf`
-
-# Additional analysis
-Using pygount, we can gather additional code complexity measurements.
-
-Make sure to export your environment variables:
-```bash
-export $(cat .env | xargs)
-```
-
-Then, run:
-```bash
-pygount --format=summary $CLONED_REPOS_DIRECTORY --format=cloc-xml --out=pygount/pygount_output.xml --verbose
-```
-
-## Yearly histogram
-- `notebooks/eda_github_repo_creation_dates.ipynb`
-
 ---
 
 Please cite as follows:
@@ -332,5 +352,5 @@ Please cite as follows:
 Ángel C. Chávez-Moreno and Cristina L. Abad. OpenLambdaVerse: A Dataset and Analysis of Open-Source Serverless Applications. _IEEE International Conference on Cloud Engineering (IC2E), to appear_. 2025.  
 
 Link to code repository: [https://github.com/disel-espol/openlambdaverse](https://github.com/disel-espol/openlambdaverse).  
-Link to dataset: [https://zenodo.org/records/16533581](https://zenodo.org/records/16533581).  
+Link to dataset (latest): [https://doi.org/10.5281/zenodo.16533580](https://doi.org/10.5281/zenodo.16533580).
 Link to pre-print: [https://arxiv.org/abs/2508.01492](https://arxiv.org/abs/2508.01492).  
