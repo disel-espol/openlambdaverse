@@ -208,11 +208,14 @@ python src/filter_non_aws_projects.py
 
 ### Cloning repositories
 
-To clone all filtered AWS repositories to your local machine (optionally to an external SSD by setting the `CLONED_REPOS_DIRECTORY` variable in your `.env` file), run:
+To clone all filtered AWS repositories, define a target directory (e.g. on an external SSD) by setting the `CLONED_REPOS_DIRECTORY` variable in your `.env` file. Then, run:
 
 ```bash
 python src/clone_projects.py
 ```
+
+#### Notes
+- If no `CLONED_REPOS_DIRECTORY` variable is present in the `.env` file, a default `cloned_aws_repos` will be used.
 
 #### Input
 - `data/processed/code_search_YYYYMMDD_hhmmss/results/aws_provider_repos.jsonl`
