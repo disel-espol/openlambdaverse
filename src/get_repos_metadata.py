@@ -72,7 +72,14 @@ RATE_LIMIT_REMAINING = 5000
 RATE_LIMIT_RESET = None
 
 def fetch_serverless_yaml(repo_owner_slash_repo):
-    """Fetch the content of all serverless.yml/serverless.yaml files from a repository."""
+    """Fetch the content of all serverless.yml/serverless.yaml files from a repository, skipping filtered YAML files."""
+    FILTERS = {
+        "learn", "sample", "hello", "greeting", "template", "example",
+        "test", "demo", "github.com/serverless", "starter", "basic",
+        "course", "github.com/Azure", "github.com/aws"
+    }
+    FILTERS_LOWER = {f.lower() for f in FILTERS}
+
     if '/' not in repo_owner_slash_repo:
         logging.warning(f"Invalid repository string: {repo_owner_slash_repo}. Expected 'owner/repo'.")
         return []
@@ -91,7 +98,7 @@ def fetch_serverless_yaml(repo_owner_slash_repo):
 
     tree_api_url = f"https://api.github.com/repos/{owner}/{repo}/git/trees/{default_branch}?recursive=1"
     try:
-        tree_response = requests.get(tree_api_url, headers=HEADERS, timeout=30) # Longer timeout for potentially large trees
+        tree_response = requests.get(tree_api_url, headers=HEADERS, timeout=30)
         check_rate_limit(tree_response.headers)
         tree_response.raise_for_status()
         tree_data = tree_response.json()
@@ -108,9 +115,15 @@ def fetch_serverless_yaml(repo_owner_slash_repo):
             
     serverless_files_content = []
     for item in tree_data.get("tree", []):
+        # Only process serverless.yml/yaml files
         if (item["path"].endswith("serverless.yml") or item["path"].endswith("serverless.yaml")) \
            and item.get("type") == "blob":
-            
+            # Skip files whose path contains any filter keyword
+            path_lower = item["path"].lower()
+            if any(f in path_lower for f in FILTERS_LOWER):
+                logging.info(f"Skipping filtered serverless file: {item['path']} in {owner}/{repo}")
+                continue
+
             file_contents_url = item.get("url") 
             if not file_contents_url: 
                 file_contents_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{item['path']}?ref={default_branch}"
