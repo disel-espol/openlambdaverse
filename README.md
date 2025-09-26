@@ -16,7 +16,7 @@ See the end of this README for citation instructions.
   - [Learn more about jq](https://stedolan.github.io/jq/)
 - `cloc`
     ```bash
-    brew install jq
+    brew install cloc
     ```
 
 ## Setup
@@ -254,6 +254,11 @@ Make sure to export your environment variables:
 export $(cat .env | xargs)
 ```
 
+And create a cloc directory to store the outputs:
+```bash
+mkdir -p cloc
+```
+
 Then run the following command:
 ```bash
 for d in "$CLONED_REPOS_DIRECTORY"/*/; do (cd "$d" && cloc --vcs=git --exclude-dir=node_modules,.venv,venv,env,vendor,target,dist,build,out,__pycache__,.vscode,.idea --not-match-f='(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|poetry\.lock|Pipfile\.lock)' --json .) | jq -c --arg repo "$(basename "$d")" '. + {repository: $repo}' >> cloc/cloc_output.jsonl; done
@@ -277,21 +282,7 @@ for d in "$REPO_DIR"; do (cd "$d" && cloc --exclude-dir=node_modules,.venv,venv,
 
 The output is saved in `cloc/cloc_output_non_git.jsonl`. Make sure to add your desired records into the broader `cloc/cloc_output.jsonl` output file.
 
-### Running analysis on select projects
-We also provide a script for specific projects. (it also handles repos. with missing .git):
-```bash
-sh scripts/analyze_selected_repos.sh
-```
-
-The output is saved in `cloc/cloc_output_selected_repos.jsonl`. Make sure to add your desired records into the broader `cloc/cloc_output.jsonl` output file.
-
-### Converting the output JSONL to CSV
-You can then convert this output to CSV using:
-```bash
-python scripts/convert_cloc_jsonl_csv.py
-```
-
-Then you can run the following notebooks to general additional CSV files for later:
+Then, run the following notebooks to generate the code complexity analysis of the repositories:
 - `notebooks/eda_loc_repos.ipynb` 
 - `notebooks/eda_loc.ipynb` 
 
