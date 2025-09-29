@@ -283,8 +283,7 @@ for d in "$REPO_DIR"; do (cd "$d" && cloc --exclude-dir=node_modules,.venv,venv,
 The output is saved in `cloc/cloc_output_non_git.jsonl`. Make sure to add your desired records into the broader `cloc/cloc_output.jsonl` output file.
 
 Then, run the following notebooks to generate the code complexity analysis of the repositories:
-- `notebooks/eda_loc_repos.ipynb` 
-- `notebooks/eda_loc.ipynb` 
+- `notebooks/analysis_code_complexity.ipynb` 
 
 ## Collecting configuration files
 To make it easier to navigate through the SF config. files, run:
@@ -293,19 +292,6 @@ python scripts/move_config_files.py
 ```
 
 ## Preparing assets for the paper
-### Tables
-We generate LaTeX tables using:
-```bash
-python scripts/generate_code_table.py
-python scripts/generate_plugins_table.py
-python scripts/generate_runtimes_table.py
-```
-
-#### Outputs
-- `paper/tables/language_bytes.tex`
-- `paper/tables/plugin_counts.tex`
-- `paper/tables/runtime_counts.tex`
-
 ### Figures
 We run the following scripts to create additional CSV files to be used on the notebooks.
 
@@ -327,15 +313,6 @@ After running these, we proceed to use additional notebooks to generate the imag
 - `notebooks/eda_github_repo_counts.ipynb` 
 - `notebooks/eda_github_repo_sizes.ipynb` 
 - `notebooks/eda_github_repo_topics.ipynb`
-
-### Flowcharts
-Use `notebooks/flowcharts.ipynb` to generate the flowchart images.
-
-#### Outputs
-- `paper/figs/flowchart`
-- `paper/figs/flowchart_eda`
-- `paper/figs/flowchart_eda.pdf`
-- `paper/figs/flowchart.pdf`
 ---
 
 Please cite as follows:
